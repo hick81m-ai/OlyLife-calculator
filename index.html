@@ -367,12 +367,12 @@
         <button class="type-btn active" data-type="new" onclick="setType('new')">
           <span class="icon">🆕</span>
           <span class="label">新規登録</span>
-          <span class="sub">初めてご登録される方</span>
+          <span class="sub">OlyLifeに初めてご登録される方</span>
         </button>
         <button class="type-btn" data-type="new-base" onclick="setType('new-base')">
           <span class="icon">🏢</span>
-          <span class="label">新規登録（ベースセンター）</span>
-          <span class="sub">ベースセンター登録をされる方</span>
+          <span class="label">新規登録（ベースセンター登録）</span>
+          <span class="sub">ベースセンター登録される方</span>
         </button>
         <button class="type-btn" data-type="add" onclick="setType('add')">
           <span class="icon">➕</span>
@@ -697,24 +697,34 @@ function recalc() {
 
   const shippingUSD = totalUSD * shippingPct;
 
+  // 750PVの倍数でない場合は料金を非表示
+  if (!valid) {
+    document.getElementById('sumProd').textContent     = '—';
+    document.getElementById('sumCustomer').textContent = '—';
+    document.getElementById('sumShipping').textContent = '—';
+    document.getElementById('totalMain').textContent   = '—';
+    document.getElementById('totalSub').textContent    = '';
+    return;
+  }
+
   if (curPay === 'cash') {
     const prodJPY  = totalUSD * rate;
     const custJPY  = custApplies ? 15400 : 0;
     const shipJPY  = shippingUSD * rate;
     const total    = prodJPY + custJPY + shipJPY;
-    document.getElementById('sumProd').textContent     = totalUSD > 0 ? fmt('¥', prodJPY) : '—';
+    document.getElementById('sumProd').textContent     = fmt('¥', prodJPY);
     document.getElementById('sumCustomer').textContent = '¥' + custJPY.toLocaleString();
-    document.getElementById('sumShipping').textContent = totalUSD > 0 ? fmt('¥', shipJPY) : '—';
-    document.getElementById('totalMain').textContent   = totalUSD > 0 ? fmt('¥', total)   : '—';
+    document.getElementById('sumShipping').textContent = fmt('¥', shipJPY);
+    document.getElementById('totalMain').textContent   = fmt('¥', total);
     document.getElementById('totalSub').textContent    = '';
   } else {
     const custUSD = custApplies ? 100 : 0;
     const grand   = totalUSD + shippingUSD + custUSD;
-    document.getElementById('sumProd').textContent     = totalUSD > 0 ? fmt('$', totalUSD)     : '—';
+    document.getElementById('sumProd').textContent     = fmt('$', totalUSD);
     document.getElementById('sumCustomer').textContent = '$' + custUSD;
-    document.getElementById('sumShipping').textContent = totalUSD > 0 ? fmt('$', shippingUSD)   : '—';
-    document.getElementById('totalMain').textContent   = totalUSD > 0 ? fmt('$', grand)         : '—';
-    document.getElementById('totalSub').textContent    = totalUSD > 0 ? '≒ ' + fmt('¥', grand * rate) : '';
+    document.getElementById('sumShipping').textContent = fmt('$', shippingUSD);
+    document.getElementById('totalMain').textContent   = fmt('$', grand);
+    document.getElementById('totalSub').textContent    = '≒ ' + fmt('¥', grand * rate);
   }
 }
 
