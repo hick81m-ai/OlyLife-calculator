@@ -367,7 +367,7 @@
         <button class="type-btn active" data-type="new" onclick="setType('new')">
           <span class="icon">🆕</span>
           <span class="label">新規登録</span>
-          <span class="sub">OlyLifeに初めてご登録される方</span>
+          <span class="sub">初めてご登録される方</span>
         </button>
         <button class="type-btn" data-type="new-base" onclick="setType('new-base')">
           <span class="icon">🏢</span>
@@ -564,7 +564,8 @@ function buildProductArea() {
   const newReg = isNewReg();
   const pv = getTotalPV();
   const sets = getSets(pv);
-  const isP3only = newReg && sets === 1; // P3 new: sub products locked
+  const hasMainSelected = MAIN_PRODUCTS.some(p => qty[p.id] > 0);
+  const isP3only = newReg && !hasMainSelected; // sub locked until a main item is chosen
 
   area.innerHTML = '';
 
@@ -633,8 +634,9 @@ function changeQty(id, delta) {
   // Recalc PV to check P3 lock for sub products
   const pv = getTotalPV();
   const sets = getSets(pv);
-  if (isNewReg() && isSub && sets === 1 && delta > 0) {
-    qty[id] = Math.max(0, newVal - 1); // revert
+  const hasMain = MAIN_PRODUCTS.some(p => qty[p.id] > 0);
+  if (isNewReg() && isSub && !hasMain && delta > 0) {
+    qty[id] = Math.max(0, newVal - 1); // revert: no main item selected
   }
 
   buildProductArea();
