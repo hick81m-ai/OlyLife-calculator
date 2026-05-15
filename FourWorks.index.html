@@ -55,10 +55,13 @@ select{width:100%;background:var(--surface);border:2px solid var(--border);color
 .product-card{background:var(--surface);border:2px solid var(--border);border-radius:20px;padding:.85rem;display:grid;grid-template-columns:58px 1fr;grid-template-areas:"img name" "img price" "qty qty";align-items:center;gap:.45rem .75rem;box-shadow:0 4px 14px rgba(10,166,194,.08);transition:border-color .2s,background .2s,transform .2s;}
 .product-card.selected{border-color:var(--accent);background:linear-gradient(180deg,#fff,var(--accent-light));box-shadow:var(--shadow-soft);}
 .product-card.disabled{opacity:.38;pointer-events:none;background:var(--surface2);}
-.prod-img{grid-area:img;width:58px;height:58px;object-fit:contain;border-radius:16px;background:white;flex-shrink:0;border:1px solid var(--border);padding:4px;}
+.prod-img-btn{grid-area:img;width:58px;height:58px;border:1px solid var(--border);border-radius:16px;background:white;padding:4px;cursor:zoom-in;display:flex;align-items:center;justify-content:center;transition:border-color .2s,transform .2s,box-shadow .2s;}
+.prod-img-btn:hover{border-color:var(--accent);transform:translateY(-1px);box-shadow:0 6px 14px rgba(10,166,194,.18);}
+.prod-img{width:100%;height:100%;object-fit:contain;border-radius:12px;display:block;}
 .product-name{grid-area:name;font-size:.98rem;font-weight:700;line-height:1.35;}
 .product-pv-price{grid-area:price;text-align:left;white-space:nowrap;display:flex;align-items:center;gap:.5rem;}
 .prod-price{font-family:"DM Mono",monospace;font-size:1rem;font-weight:700;color:var(--accent-dark);}
+.prod-price::after{content:" 送料込";font-family:"Noto Sans JP",sans-serif;font-size:.62rem;font-weight:700;color:var(--text-muted);margin-left:.18rem;}
 .prod-yen{font-family:"DM Mono",monospace;font-size:.82rem;font-weight:700;color:#12834b;background:var(--green-light);border-radius:999px;padding:.14rem .48rem;}
 .prod-pv{font-size:.72rem;color:var(--text-muted);font-family:"DM Mono",monospace;background:var(--surface2);border-radius:999px;padding:.12rem .45rem;}
 .qty-ctrl{grid-area:qty;display:flex;align-items:center;justify-content:flex-end;gap:.6rem;margin-top:.35rem;padding-top:.55rem;border-top:1px solid var(--border);}
@@ -114,6 +117,12 @@ select{width:100%;background:var(--surface);border:2px solid var(--border);color
 .copy-btn:disabled{background:var(--border);color:var(--text-muted);cursor:not-allowed;transform:none;}
 .copy-btn.copied{background:#1a6e3a;}
 .footnote{background:rgba(255,255,255,.68);border:1px dashed var(--border);padding:1rem;font-size:.78rem;color:var(--text-muted);line-height:1.7;}
+.image-modal{position:fixed;inset:0;background:rgba(5,35,47,.72);display:none;align-items:center;justify-content:center;padding:1rem;z-index:50;backdrop-filter:blur(4px);}
+.image-modal.show{display:flex;}
+.image-modal-card{position:relative;width:min(92vw,520px);background:white;border-radius:24px;padding:1.1rem;box-shadow:0 22px 60px rgba(5,35,47,.34);}
+.image-modal-close{position:absolute;right:.8rem;top:.8rem;width:38px;height:38px;border:none;border-radius:999px;background:var(--accent-light);color:var(--accent-dark);font-size:1.4rem;line-height:1;cursor:pointer;}
+.image-modal-title{padding-right:2.7rem;margin-bottom:.85rem;font-weight:700;color:var(--text);}
+.image-modal-img{width:100%;max-height:72vh;object-fit:contain;border-radius:18px;background:linear-gradient(180deg,#fff,var(--surface2));border:1px solid var(--border);padding:1rem;}
 @media(min-width:720px){.hero-stats{grid-template-columns:repeat(2,1fr);}.type-grid{grid-template-columns:repeat(3,1fr);}.type-btn{text-align:center;}.type-btn .icon{display:block;margin:0 0 .35rem;}.type-btn .label{display:block;}.type-btn .sub{padding-left:0;}.product-list{grid-template-columns:repeat(2,minmax(0,1fr));}}
 @media(min-width:980px){header{padding:1.35rem 2rem;display:flex;align-items:center;gap:1.4rem;}.logo{margin-bottom:0;font-size:2.1rem;}.hero-stats{max-width:560px;}.main{grid-template-columns:minmax(0,1fr) 430px;align-items:start;padding:1.35rem 2rem 2rem;}.left-panel{gap:1.25rem;}.right-panel{position:sticky;top:1rem;max-height:calc(100vh - 2rem);overflow-y:auto;gap:1rem;padding-right:.2rem;}.section{padding:1.25rem;}.summary-card{order:0;}.product-list{grid-template-columns:1fr;}.product-card{grid-template-columns:58px 1fr auto auto;grid-template-areas:"img name price qty";padding:.85rem 1rem;}.product-pv-price{text-align:right;justify-content:flex-end;}.qty-ctrl{border-top:none;margin-top:0;padding-top:0;}}
 </style>
@@ -132,7 +141,7 @@ select{width:100%;background:var(--surface);border:2px solid var(--border);color
     <h1>OlyLife 登録料金表</h1>
     <p>商品選択からコピーまで、フォー・ワークス専用に見やすく整理しました。</p>
     <div class="hero-stats">
-      <div class="hero-stat"><span>カスタマー料</span><strong>¥15,400固定</strong></div>
+      <div class="hero-stat"><span>カスタマー料</span><strong>¥15,400</strong></div>
       <div class="hero-stat"><span>PVルール</span><strong>750単位</strong></div>
     </div>
   </div>
@@ -245,6 +254,14 @@ select{width:100%;background:var(--surface);border:2px solid var(--border);color
     <div class="footnote">※ 本計算はあくまでも目安です。<br>※ 実際のお支払い金額は担当者にご確認ください。</div>
   </div>
 </div>
+<div class="image-modal" id="imageModal" onclick="closeProductImage()" aria-hidden="true">
+  <div class="image-modal-card" onclick="event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="imageModalTitle">
+    <button class="image-modal-close" type="button" onclick="closeProductImage()" aria-label="閉じる">×</button>
+    <div class="image-modal-title" id="imageModalTitle"></div>
+    <img class="image-modal-img" id="imageModalImg" src="" alt="">
+  </div>
+</div>
+
 <script>
 var IMG = {};
 IMG["OLY-HCA002"] = "data:image/jpeg;base64,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";
@@ -318,15 +335,23 @@ function makeCard(p, disabled){
   var card = document.createElement("div");
   card.className = "product-card"+(qty[p.id]>0?" selected":"")+(disabled?" disabled":"");
   if(IMG[p.id]){
+    var imgBtn = document.createElement("button");
+    imgBtn.type = "button";
+    imgBtn.className = "prod-img-btn";
+    imgBtn.setAttribute("aria-label", p.name+"の画像を拡大表示");
+    imgBtn.onclick = (function(src,name){ return function(){ openProductImage(src,name); }; })(IMG[p.id],p.name);
     var img = document.createElement("img");
     img.src = IMG[p.id];
     img.alt = p.name; img.className = "prod-img";
-    card.appendChild(img);
+    imgBtn.appendChild(img);
+    card.appendChild(imgBtn);
   }
   var nm = document.createElement("div"); nm.className="product-name"; nm.textContent=p.name; card.appendChild(nm);
   var pp = document.createElement("div"); pp.className="product-pv-price";
   var rate=parseFloat(document.getElementById("exchangeRate").value)||165;
-  pp.innerHTML = "<div class='prod-price'>$"+p.price.toLocaleString()+"</div><div class='prod-yen' data-usd='"+p.price+"'>¥"+Math.round(p.price*rate).toLocaleString()+"</div><div class='prod-pv'>"+p.pv.toLocaleString()+" PV</div>";
+  var shp=parseFloat(document.getElementById("countrySelect").value)/100;
+  var displayUsd=p.price*(1+shp);
+  pp.innerHTML = "<div class='prod-price' data-usd='"+p.price+"'>$"+Math.round(displayUsd).toLocaleString()+"</div><div class='prod-yen' data-usd='"+p.price+"'>¥"+Math.round(displayUsd*rate).toLocaleString()+"</div><div class='prod-pv'>"+p.pv.toLocaleString()+" PV</div>";
   card.appendChild(pp);
   var qc = document.createElement("div"); qc.className="qty-ctrl";
   var bm = document.createElement("button"); bm.className="qty-btn"; bm.textContent="−";
@@ -387,18 +412,42 @@ function setPayTab(el,t){
   el.classList.add("active"); recalc();
 }
 
-function updateProductYen(rate){
-  var nodes=document.querySelectorAll(".prod-yen[data-usd]");
-  for(var i=0;i<nodes.length;i++){
-    var usd=parseFloat(nodes[i].getAttribute("data-usd"))||0;
-    nodes[i].textContent="¥"+Math.round(usd*rate).toLocaleString();
+function openProductImage(src,name){
+  var modal=document.getElementById("imageModal");
+  var img=document.getElementById("imageModalImg");
+  var title=document.getElementById("imageModalTitle");
+  img.src=src; img.alt=name; title.textContent=name;
+  modal.classList.add("show");
+  modal.setAttribute("aria-hidden","false");
+}
+
+function closeProductImage(){
+  var modal=document.getElementById("imageModal");
+  modal.classList.remove("show");
+  modal.setAttribute("aria-hidden","true");
+}
+
+document.addEventListener("keydown", function(e){
+  if(e.key==="Escape") closeProductImage();
+});
+
+function updateProductPrices(rate,shp){
+  var priceNodes=document.querySelectorAll(".prod-price[data-usd]");
+  for(var i=0;i<priceNodes.length;i++){
+    var usd=parseFloat(priceNodes[i].getAttribute("data-usd"))||0;
+    priceNodes[i].textContent="$"+Math.round(usd*(1+shp)).toLocaleString();
+  }
+  var yenNodes=document.querySelectorAll(".prod-yen[data-usd]");
+  for(var j=0;j<yenNodes.length;j++){
+    var yenUsd=parseFloat(yenNodes[j].getAttribute("data-usd"))||0;
+    yenNodes[j].textContent="¥"+Math.round(yenUsd*(1+shp)*rate).toLocaleString();
   }
 }
 
 function recalc(){
   var rate=parseFloat(document.getElementById("exchangeRate").value)||165;
-  updateProductYen(rate);
   var shp=parseFloat(document.getElementById("countrySelect").value)/100;
+  updateProductPrices(rate,shp);
   var pv=totalPV(), usd=totalUSD();
   var valid=pv>0&&pv%750===0;
   var sets=valid?pv/750:0;
@@ -441,7 +490,7 @@ function recalc(){
     var cusd=hasCust()?CUSTOMER_FEE_USD:0, cjpy=hasCust()?CUSTOMER_FEE_JPY:0, grand=usd+shipUSD+cusd;
     var grandJpy=usd*rate+shipUSD*rate+cjpy;
     document.getElementById("sumProd").textContent=fmt("$",usd);
-    document.getElementById("sumCustomer").textContent="$"+cusd+" (¥"+cjpy.toLocaleString()+"固定)";
+    document.getElementById("sumCustomer").textContent="$"+cusd+" (¥"+cjpy.toLocaleString()+")";
     document.getElementById("sumShipping").textContent=fmt("$",shipUSD);
     document.getElementById("totalMain").textContent=fmt("$",grand);
     document.getElementById("totalSub").textContent="≒ "+fmt("¥",grandJpy);
@@ -480,7 +529,7 @@ function genCopyText(){
   t+="[選択商品]\n"+lines+"\n";
   t+="[料金内訳]\n";
   t+="商品代金    $"+usd.toLocaleString()+" ("+String.fromCharCode(165)+Math.round(usd*rate).toLocaleString()+")\n";
-  if(hasCust()) t+="カスタマー料 $"+cusd+" ("+String.fromCharCode(165)+cjpy.toLocaleString()+"固定)\n";
+  if(hasCust()) t+="カスタマー料 $"+cusd+" ("+String.fromCharCode(165)+cjpy.toLocaleString()+")\n";
   t+="送料("+Math.round(shp*100)+"%) $"+Math.round(shipUSD).toLocaleString()+" ("+String.fromCharCode(165)+Math.round(shipUSD*rate).toLocaleString()+")\n";
   var pts=getPointTotal();
   if(pts>0){
